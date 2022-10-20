@@ -6,6 +6,7 @@ import torchvision.models as models
 import torch.nn.functional as F
 from torch.autograd import Variable
 
+
 def conv_bn(inp, oup, stride = 1, leaky = 0):
     return nn.Sequential(
         nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
@@ -13,11 +14,13 @@ def conv_bn(inp, oup, stride = 1, leaky = 0):
         nn.LeakyReLU(negative_slope=leaky, inplace=True)
     )
 
+
 def conv_bn_no_relu(inp, oup, stride):
     return nn.Sequential(
         nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
         nn.BatchNorm2d(oup),
     )
+
 
 def conv_bn1X1(inp, oup, stride, leaky=0):
     return nn.Sequential(
@@ -25,6 +28,7 @@ def conv_bn1X1(inp, oup, stride, leaky=0):
         nn.BatchNorm2d(oup),
         nn.LeakyReLU(negative_slope=leaky, inplace=True)
     )
+
 
 def conv_dw(inp, oup, stride, leaky=0.1):
     return nn.Sequential(
@@ -36,6 +40,7 @@ def conv_dw(inp, oup, stride, leaky=0.1):
         nn.BatchNorm2d(oup),
         nn.LeakyReLU(negative_slope= leaky,inplace=True),
     )
+
 
 class SSH(nn.Module):
     def __init__(self, in_channel, out_channel):
@@ -64,6 +69,7 @@ class SSH(nn.Module):
         out = torch.cat([conv3X3, conv5X5, conv7X7], dim=1)
         out = F.relu(out)
         return out
+
 
 class FPN(nn.Module):
     def __init__(self,in_channels_list,out_channels):
@@ -96,7 +102,6 @@ class FPN(nn.Module):
 
         out = [output1, output2, output3]
         return out
-
 
 
 class BiFPN(nn.Module):
@@ -132,17 +137,14 @@ class BiFPN(nn.Module):
         output1 = self.merge1(output1)
 
         # Down up
-        o1 = F.interpolate(output1, size=[output2.size(2), output2.size(2)], mode="nearest")
+        o1 = F.interpolate(output1, size=[output2.size(2), output2.size(3)], mode="nearest")
         output2 = o1 + output2 + output2_in
 
-        o2 = F.interpolate(output2, size=[output3.size(2), output3.size(2)], mode="nearest")
+        o2 = F.interpolate(output2, size=[output3.size(2), output3.size(3)], mode="nearest")
         output3 = o2 + output3 + output3_in
-
 
         out = [output1, output2, output3]
         return out
-
-
 
 
 class MobileNetV1(nn.Module):
